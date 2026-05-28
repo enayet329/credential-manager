@@ -10,7 +10,7 @@ import type { ApiProblem, LoginResponse } from "@/lib/types";
 
 export default function LoginPage() {
   const router = useRouter();
-  const [email, setEmail] = useState("admin@credvault.local");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -44,30 +44,40 @@ export default function LoginPage() {
   }
 
   return (
-    <main className="min-h-screen grid place-items-center px-6">
-      <div className="w-full max-w-md">
+    <main className="relative min-h-screen overflow-hidden bg-slate-950">
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 -z-10 opacity-50"
+        style={{
+          background:
+            "radial-gradient(50% 40% at 50% 0%, rgba(16,185,129,0.18) 0%, rgba(16,185,129,0) 60%)",
+        }}
+      />
+
+      <div className="mx-auto flex min-h-screen max-w-md flex-col items-stretch justify-center px-6 py-12">
         <Link href="/" className="mb-8 flex items-center gap-2 text-lg font-semibold">
-          <span className="grid h-8 w-8 place-items-center rounded-md bg-emerald-500/20 text-emerald-300">
+          <span className="grid h-9 w-9 place-items-center rounded-md bg-emerald-500/20 text-emerald-300">
             CV
           </span>
           CredVault
         </Link>
 
-        <div className="rounded-2xl border border-slate-800 bg-slate-900/60 p-8 shadow-xl">
-          <h1 className="text-2xl font-semibold">Sign in</h1>
+        <div className="rounded-2xl border border-slate-800 bg-slate-900/60 p-8 shadow-2xl backdrop-blur">
+          <h1 className="text-2xl font-semibold">Welcome back</h1>
           <p className="mt-1 text-sm text-slate-400">
-            Use the admin credentials produced by the data seeder.
+            Sign in to your vault to manage credentials.
           </p>
 
-          <form onSubmit={onSubmit} className="mt-6 space-y-4">
+          <form onSubmit={onSubmit} className="mt-7 space-y-4">
             <Field
               id="email"
               label="Email"
               type="email"
               autoComplete="email"
               value={email}
-              onChange={(v) => setEmail(v)}
+              onChange={setEmail}
               required
+              placeholder="you@example.com"
             />
             <Field
               id="password"
@@ -75,8 +85,9 @@ export default function LoginPage() {
               type="password"
               autoComplete="current-password"
               value={password}
-              onChange={(v) => setPassword(v)}
+              onChange={setPassword}
               required
+              placeholder="••••••••"
             />
 
             {error && (
@@ -93,6 +104,19 @@ export default function LoginPage() {
               {submitting ? "Signing in…" : "Sign in"}
             </button>
           </form>
+
+          <div className="my-6 flex items-center gap-3 text-xs text-slate-600">
+            <div className="h-px flex-1 bg-slate-800" />
+            new here?
+            <div className="h-px flex-1 bg-slate-800" />
+          </div>
+
+          <Link
+            href="/register"
+            className="block w-full rounded-md border border-slate-700 px-4 py-2.5 text-center text-sm font-semibold text-slate-100 transition hover:border-emerald-500/50 hover:bg-emerald-500/5"
+          >
+            Create your account
+          </Link>
         </div>
 
         <p className="mt-6 text-center text-sm text-slate-500">
@@ -110,15 +134,25 @@ interface FieldProps {
   label: string;
   type: string;
   value: string;
+  onChange: (v: string) => void;
   autoComplete?: string;
   required?: boolean;
-  onChange: (v: string) => void;
+  placeholder?: string;
 }
 
-function Field({ id, label, type, value, autoComplete, required, onChange }: FieldProps) {
+function Field({
+  id,
+  label,
+  type,
+  value,
+  autoComplete,
+  required,
+  placeholder,
+  onChange,
+}: FieldProps) {
   return (
     <div>
-      <label htmlFor={id} className="mb-1 block text-sm font-medium text-slate-300">
+      <label htmlFor={id} className="mb-1.5 block text-sm font-medium text-slate-300">
         {label}
       </label>
       <input
@@ -127,8 +161,9 @@ function Field({ id, label, type, value, autoComplete, required, onChange }: Fie
         value={value}
         autoComplete={autoComplete}
         required={required}
+        placeholder={placeholder}
         onChange={(e) => onChange(e.target.value)}
-        className="block w-full rounded-md border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/30"
+        className="block w-full rounded-md border border-slate-700 bg-slate-950 px-3.5 py-2.5 text-sm text-slate-100 placeholder:text-slate-600 focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/30"
       />
     </div>
   );

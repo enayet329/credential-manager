@@ -36,48 +36,62 @@ export default function RegisterPage() {
   }
 
   return (
-    <main className="min-h-screen grid place-items-center px-6">
-      <div className="w-full max-w-md">
+    <main className="relative min-h-screen overflow-hidden bg-slate-950">
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 -z-10 opacity-50"
+        style={{
+          background:
+            "radial-gradient(50% 40% at 50% 0%, rgba(56,189,248,0.18) 0%, rgba(56,189,248,0) 60%)",
+        }}
+      />
+
+      <div className="mx-auto flex min-h-screen max-w-md flex-col items-stretch justify-center px-6 py-12">
         <Link href="/" className="mb-8 flex items-center gap-2 text-lg font-semibold">
-          <span className="grid h-8 w-8 place-items-center rounded-md bg-emerald-500/20 text-emerald-300">
+          <span className="grid h-9 w-9 place-items-center rounded-md bg-emerald-500/20 text-emerald-300">
             CV
           </span>
           CredVault
         </Link>
 
-        <div className="rounded-2xl border border-slate-800 bg-slate-900/60 p-8 shadow-xl">
+        <div className="rounded-2xl border border-slate-800 bg-slate-900/60 p-8 shadow-2xl backdrop-blur">
           <h1 className="text-2xl font-semibold">Create your account</h1>
           <p className="mt-1 text-sm text-slate-400">
-            We&apos;ll set up a personal workspace so you have somewhere to store your first credential.
+            We&apos;ll spin up a personal workspace so you have somewhere to store your
+            first credential. You can invite teammates later.
           </p>
 
-          <form onSubmit={onSubmit} className="mt-6 space-y-4">
+          <form onSubmit={onSubmit} className="mt-7 space-y-4">
             <Field
               id="email"
-              label="Email"
+              label="Work email"
               type="email"
               autoComplete="email"
               value={email}
               onChange={setEmail}
               required
+              placeholder="you@example.com"
             />
             <Field
               id="password"
-              label="Password (8+ characters)"
+              label="Password"
+              hint="At least 8 characters."
               type="password"
               autoComplete="new-password"
               value={password}
               onChange={setPassword}
               required
               minLength={8}
+              placeholder="••••••••"
             />
             <Field
               id="workspace"
-              label="Workspace name (optional)"
+              label="Workspace name"
+              hint="Optional — defaults to “your-name’s workspace”."
               type="text"
               value={workspace}
               onChange={setWorkspace}
-              placeholder="Defaults to your-name's workspace"
+              placeholder="Acme Inc."
             />
 
             {error && (
@@ -94,13 +108,18 @@ export default function RegisterPage() {
               {submitting ? "Creating account…" : "Create account"}
             </button>
           </form>
+
+          <p className="mt-6 text-center text-sm text-slate-500">
+            Already have an account?{" "}
+            <Link href="/login" className="text-emerald-300 hover:text-emerald-200">
+              Sign in
+            </Link>
+          </p>
         </div>
 
-        <p className="mt-6 text-center text-sm text-slate-500">
-          Already have an account?{" "}
-          <Link href="/login" className="text-slate-300 hover:text-white">
-            Sign in
-          </Link>
+        <p className="mt-6 text-center text-xs text-slate-600">
+          By creating an account you agree to keep your master key safe. CredVault
+          can&apos;t recover encrypted data if you lose it.
         </p>
       </div>
     </main>
@@ -117,6 +136,7 @@ interface FieldProps {
   required?: boolean;
   placeholder?: string;
   minLength?: number;
+  hint?: string;
 }
 
 function Field({
@@ -129,10 +149,11 @@ function Field({
   required,
   placeholder,
   minLength,
+  hint,
 }: FieldProps) {
   return (
     <div>
-      <label htmlFor={id} className="mb-1 block text-sm font-medium text-slate-300">
+      <label htmlFor={id} className="mb-1.5 block text-sm font-medium text-slate-300">
         {label}
       </label>
       <input
@@ -144,8 +165,9 @@ function Field({
         required={required}
         placeholder={placeholder}
         minLength={minLength}
-        className="block w-full rounded-md border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/30"
+        className="block w-full rounded-md border border-slate-700 bg-slate-950 px-3.5 py-2.5 text-sm text-slate-100 placeholder:text-slate-600 focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/30"
       />
+      {hint && <p className="mt-1 text-xs text-slate-500">{hint}</p>}
     </div>
   );
 }
