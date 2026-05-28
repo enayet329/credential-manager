@@ -17,4 +17,8 @@ public sealed class FrontendOptions
 
     /// <summary>Full URL of a share-redemption page for the given token.</summary>
     public string ShareUrl(string token) => $"{BaseUrl.TrimEnd('/')}/share/{Uri.EscapeDataString(token)}";
+
+    /// <summary>Full URL of the reset-password page for the given token.</summary>
+    public string PasswordResetUrl(string token) =>
+        $"{BaseUrl.TrimEnd('/')}/reset-password?token={Uri.EscapeDataString(token)}";
 }

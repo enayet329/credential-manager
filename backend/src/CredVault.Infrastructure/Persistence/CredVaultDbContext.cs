@@ -40,6 +40,9 @@ public sealed class CredVaultDbContext : DbContext
     /// <summary>User accounts.</summary>
     public DbSet<User> Users => Set<User>();
 
+    /// <summary>One-use password-reset tokens.</summary>
+    public DbSet<PasswordResetToken> PasswordResetTokens => Set<PasswordResetToken>();
+
     /// <summary>Projects.</summary>
     public DbSet<Project> Projects => Set<Project>();
 

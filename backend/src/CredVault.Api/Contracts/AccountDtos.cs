@@ -13,6 +13,15 @@ public sealed record ChangePasswordRequest(
     [property: Required, MinLength(1)] string CurrentPassword,
     [property: Required, StringLength(128, MinimumLength = 8)] string NewPassword);
 
+/// <summary>Body for <c>POST /auth/forgot-password</c>.</summary>
+public sealed record ForgotPasswordRequest(
+    [property: Required, EmailAddress] string Email);
+
+/// <summary>Body for <c>POST /auth/reset-password</c>.</summary>
+public sealed record ResetPasswordRequest(
+    [property: Required, MinLength(8)] string Token,
+    [property: Required, StringLength(128, MinimumLength = 8)] string NewPassword);
+
 /// <summary>Body for <c>POST /credentials/{id}/share</c>.</summary>
 public sealed record CreateShareRequest(
     [property: Range(5, 24 * 60 * 7)] int ExpiresInMinutes = 60,
