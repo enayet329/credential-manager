@@ -1,0 +1,9 @@
+global using CredVault.Application.Abstractions.Caching;
+global using CredVault.Application.Abstractions.Cryptography;
+global using CredVault.Application.Abstractions.Persistence;
+global using CredVault.Application.Abstractions.RateLimiting;
+global using CredVault.Application.Abstractions.Schemas;
+global using CredVault.Application.Abstractions.Vault;
+global using CredVault.Domain.Abstractions;
+global using CredVault.Domain.Enums;
+global using CredVault.Domain.ValueObjects;

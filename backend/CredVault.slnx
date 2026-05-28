@@ -1,0 +1,14 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/CredVault.Api/CredVault.Api.csproj" />
+    <Project Path="src/CredVault.Application/CredVault.Application.csproj" />
+    <Project Path="src/CredVault.Domain/CredVault.Domain.csproj" />
+    <Project Path="src/CredVault.Infrastructure/CredVault.Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/CredVault.Api.IntegrationTests/CredVault.Api.IntegrationTests.csproj" />
+    <Project Path="tests/CredVault.Application.Tests/CredVault.Application.Tests.csproj" />
+    <Project Path="tests/CredVault.Domain.Tests/CredVault.Domain.Tests.csproj" />
+    <Project Path="tests/CredVault.Infrastructure.Tests/CredVault.Infrastructure.Tests.csproj" />
+  </Folder>
+</Solution>

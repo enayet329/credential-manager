@@ -1,0 +1,11 @@
+# EF Core generates migration files mechanically; the standard CredVault analyzer rules don't
+# apply to them. Disable the noisy ones here so we don't have to hand-edit generated code.
+[*.cs]
+generated_code = true
+
+dotnet_diagnostic.CA1861.severity = none
+dotnet_diagnostic.CA1707.severity = none
+dotnet_diagnostic.CA1062.severity = none
+dotnet_diagnostic.CA2227.severity = none
+dotnet_diagnostic.IDE0161.severity = none
+dotnet_diagnostic.IDE0005.severity = none

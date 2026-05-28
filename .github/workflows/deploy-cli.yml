@@ -1,0 +1,56 @@
+name: deploy-cli
+
+on:
+  push:
+    tags:
+      - "cli-v*"
+
+jobs:
+  pack-and-push:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    environment:
+      name: nuget
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET 10
+        uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+
+      - name: Derive version from tag
+        id: ver
+        run: |
+          TAG="${GITHUB_REF##*/}"
+          VERSION="${TAG#cli-v}"
+          if [ -z "$VERSION" ]; then
+            echo "::error::Could not derive version from tag '$TAG'"
+            exit 1
+          fi
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "Releasing CredVault.Cli $VERSION"
+
+      - name: Restore
+        run: dotnet restore cli/src/CredVault.Cli/CredVault.Cli.csproj
+
+      - name: Pack
+        run: |
+          dotnet pack cli/src/CredVault.Cli/CredVault.Cli.csproj \
+            --configuration Release \
+            --no-restore \
+            -p:Version=${{ steps.ver.outputs.version }} \
+            -o ./artifacts
+
+      - name: Push to nuget.org
+        env:
+          NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
+        run: |
+          if [ -z "${NUGET_API_KEY:-}" ]; then
+            echo "::error::NUGET_API_KEY secret is not configured."
+            exit 1
+          fi
+          dotnet nuget push ./artifacts/CredVault.Cli.*.nupkg \
+            --api-key "$NUGET_API_KEY" \
+            --source https://api.nuget.org/v3/index.json \
+            --skip-duplicate

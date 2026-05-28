@@ -1,0 +1,11 @@
+global using System.Net;
+global using System.Net.Http;
+global using System.Net.Http.Headers;
+global using System.Net.Http.Json;
+global using System.Text;
+global using System.Text.Json;
+global using Xunit;
+global using FluentAssertions;
+global using CredVault.Api.Contracts;
+global using CredVault.Domain.Abstractions;
+global using CredVault.Domain.Enums;

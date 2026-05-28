@@ -1,0 +1,40 @@
+# syntax=docker/dockerfile:1.7
+# Build stage — restore + publish the API
+FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
+WORKDIR /src
+
+# Copy solution-level build config first (better layer caching)
+COPY global.json Directory.Build.props Directory.Packages.props ./
+
+# Copy backend project files for restore (path is relative to repo root)
+COPY backend/CredVault.slnx backend/
+COPY backend/src/CredVault.Domain/CredVault.Domain.csproj backend/src/CredVault.Domain/
+COPY backend/src/CredVault.Application/CredVault.Application.csproj backend/src/CredVault.Application/
+COPY backend/src/CredVault.Infrastructure/CredVault.Infrastructure.csproj backend/src/CredVault.Infrastructure/
+COPY backend/src/CredVault.Api/CredVault.Api.csproj backend/src/CredVault.Api/
+
+RUN dotnet restore backend/src/CredVault.Api/CredVault.Api.csproj
+
+# Copy the rest and publish
+COPY backend/ backend/
+RUN dotnet publish backend/src/CredVault.Api/CredVault.Api.csproj \
+    -c Release \
+    -o /app/publish \
+    --no-restore \
+    /p:UseAppHost=false
+
+# Runtime stage
+FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS runtime
+WORKDIR /app
+
+# Non-root user for the runtime
+RUN groupadd -r credvault && useradd -r -g credvault credvault
+
+COPY --from=build /app/publish .
+RUN chown -R credvault:credvault /app
+USER credvault
+
+ENV ASPNETCORE_URLS=http://+:8080
+EXPOSE 8080
+
+ENTRYPOINT ["dotnet", "CredVault.Api.dll"]

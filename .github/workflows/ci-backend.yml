@@ -1,0 +1,65 @@
+name: ci-backend
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "backend/**"
+      - "cli/**"
+      - "global.json"
+      - "Directory.Build.props"
+      - "Directory.Packages.props"
+      - ".github/workflows/ci-backend.yml"
+  pull_request:
+    paths:
+      - "backend/**"
+      - "cli/**"
+      - "global.json"
+      - "Directory.Build.props"
+      - "Directory.Packages.props"
+      - ".github/workflows/ci-backend.yml"
+
+jobs:
+  build-test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET 10
+        uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+
+      - name: Cache NuGet packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj', 'Directory.Packages.props') }}
+          restore-keys: |
+            ${{ runner.os }}-nuget-
+
+      - name: Restore (backend)
+        run: dotnet restore backend/CredVault.slnx
+
+      - name: Restore (cli)
+        run: dotnet restore cli/CredVault.Cli.slnx
+
+      - name: Build (backend) — fail on warnings
+        run: dotnet build backend/CredVault.slnx --configuration Release --no-restore -warnaserror
+
+      - name: Build (cli) — fail on warnings
+        run: dotnet build cli/CredVault.Cli.slnx --configuration Release --no-restore -warnaserror
+
+      - name: Test (backend)
+        run: dotnet test backend/CredVault.slnx --configuration Release --no-build --logger "trx;LogFileName=backend-tests.trx"
+
+      - name: Test (cli)
+        run: dotnet test cli/CredVault.Cli.slnx --configuration Release --no-build --logger "trx;LogFileName=cli-tests.trx"
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: dotnet-test-results
+          path: "**/*.trx"

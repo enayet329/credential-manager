@@ -1,0 +1,67 @@
+# Build output
+bin/
+obj/
+out/
+publish/
+*.dll
+*.pdb
+*.exe
+
+# .NET / Visual Studio
+.vs/
+*.user
+*.suo
+*.userprefs
+.idea/
+*.iml
+.vscode/
+
+# Logs and runtime
+*.log
+logs/
+
+# Node / Next.js
+node_modules/
+.next/
+.turbo/
+.vercel/
+dist/
+build/
+coverage/
+.npm/
+.pnp.*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Test results
+TestResults/
+*.trx
+*.coverage
+*.coveragexml
+
+# Secrets — NEVER commit any of these
+.env
+.env.*
+!.env.example
+appsettings.Development.json
+appsettings.Local.json
+appsettings.Production.json
+appsettings.Staging.json
+secrets.json
+*.pfx
+*.key
+master-key.bin
+**/secrets/
+
+# CredVault local CLI state — NEVER commit any of these
+~/.credvault/
+.credvault/
+credvault.config.local.json
+
+# Local docker volumes
+docker/data/
+
+# CLI pack output
+cli/artifacts/

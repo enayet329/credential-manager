@@ -1,0 +1,8 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/CredVault.Cli/CredVault.Cli.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/CredVault.Cli.Tests/CredVault.Cli.Tests.csproj" />
+  </Folder>
+</Solution>
