@@ -27,6 +27,11 @@ if (args.Length > 0 && string.Equals(args[0], "migrate", StringComparison.Ordina
     return await RunMigrateAsync(args);
 }
 
+if (args.Length > 0 && string.Equals(args[0], "send-test-email", StringComparison.OrdinalIgnoreCase))
+{
+    return await RunSendTestEmailAsync(args);
+}
+
 // ─── Web app ───────────────────────────────────────────────────────────────
 
 var builder = WebApplication.CreateBuilder(args);
@@ -120,6 +125,29 @@ static async Task<int> RunMigrateAsync(string[] args)
     Console.WriteLine("Applying EF Core migrations…");
     await ctx.Database.MigrateAsync();
     Console.WriteLine("Migrations applied.");
+    return 0;
+}
+
+static async Task<int> RunSendTestEmailAsync(string[] args)
+{
+    var to = GetArg(args, "--to") ?? GetArg(args, "-t");
+    if (string.IsNullOrWhiteSpace(to))
+    {
+        Console.Error.WriteLine("Usage: dotnet run -- send-test-email --to recipient@example.com");
+        return 2;
+    }
+
+    var b = WebApplication.CreateBuilder(args);
+    b.Services.AddCredVaultInfrastructure(b.Configuration);
+    b.Services.AddCredVaultApi(b.Configuration);
+    var app = b.Build();
+    using var scope = app.Services.CreateScope();
+    var sender = scope.ServiceProvider.GetRequiredService<CredVault.Api.Auth.IEmailSender>();
+    Console.WriteLine($"Sending test email to {to} via the configured IEmailSender ({sender.GetType().Name})…");
+    await sender.SendAsync(to,
+        "CredVault test email",
+        "If you can read this, your SMTP configuration is working end-to-end.");
+    Console.WriteLine("Sent.");
     return 0;
 }
 

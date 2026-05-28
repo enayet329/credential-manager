@@ -49,6 +49,10 @@ public sealed class SmtpEmailSender : IEmailSender
         message.Body = new TextPart("plain") { Text = body };
 
         using var client = new SmtpClient();
+        // Disable CRL/OCSP revocation checks. Chain validation against the OS trust store still
+        // applies — this just stops MailKit from hard-failing when a CRL endpoint is unreachable,
+        // which is common on dev networks and behind some corporate proxies.
+        client.CheckCertificateRevocation = false;
         try
         {
             var secureOptions = _options.UseStartTls

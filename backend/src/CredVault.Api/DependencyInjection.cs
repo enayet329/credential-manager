@@ -30,7 +30,16 @@ public static class DependencyInjection
         services.AddSingleton<StepUpTokenService>();
         services.AddSingleton<AccessTokenService>();
         services.AddSingleton<ShareTokenService>();
-        services.AddSingleton<IEmailSender, LoggingEmailSender>();
+
+        // SMTP email when configured; otherwise the dev logging stub.
+        services.AddOptions<SmtpOptions>()
+            .Bind(configuration.GetSection(SmtpOptions.SectionName));
+        var smtpHost = configuration.GetValue<string>($"{SmtpOptions.SectionName}:Host");
+        if (!string.IsNullOrWhiteSpace(smtpHost))
+            services.AddSingleton<IEmailSender, SmtpEmailSender>();
+        else
+            services.AddSingleton<IEmailSender, LoggingEmailSender>();
+
         services.AddScoped<ICurrentUser, HttpContextCurrentUser>();
         services.AddScoped<SlugLookup>();
         services.AddScoped<AuditHookFilter>();
