@@ -33,6 +33,7 @@
     <PackageVersion Include="BCrypt.Net-Next" Version="4.2.1" />
     <PackageVersion Include="ClosedXML" Version="0.105.0" />
     <PackageVersion Include="MailKit" Version="4.17.0" />
+    <PackageVersion Include="Resend" Version="0.5.1" />
   </ItemGroup>
 
   <ItemGroup Label="Cli">

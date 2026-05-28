@@ -31,11 +31,28 @@ public static class DependencyInjection
         services.AddSingleton<AccessTokenService>();
         services.AddSingleton<ShareTokenService>();
 
-        // SMTP email when configured; otherwise the dev logging stub.
-        services.AddOptions<SmtpOptions>()
-            .Bind(configuration.GetSection(SmtpOptions.SectionName));
+        // Email transport. Preference order:
+        //   1. Resend HTTP API     (Resend:ApiKey set)
+        //   2. Brevo HTTP API      (Brevo:ApiKey set)
+        //   3. SMTP relay          (Smtp:Host set)
+        //   4. Logging stub        (otherwise — for dev)
+        services.AddOptions<SmtpOptions>().Bind(configuration.GetSection(SmtpOptions.SectionName));
+        services.AddOptions<BrevoOptions>().Bind(configuration.GetSection(BrevoOptions.SectionName));
+        services.AddOptions<ResendOptions>().Bind(configuration.GetSection(ResendOptions.SectionName));
+        services.AddHttpClient();
+
+        var resendKey = configuration.GetValue<string>($"{ResendOptions.SectionName}:ApiKey");
+        var brevoKey = configuration.GetValue<string>($"{BrevoOptions.SectionName}:ApiKey");
         var smtpHost = configuration.GetValue<string>($"{SmtpOptions.SectionName}:Host");
-        if (!string.IsNullOrWhiteSpace(smtpHost))
+
+        if (!string.IsNullOrWhiteSpace(resendKey))
+        {
+            services.AddSingleton<Resend.IResend>(_ => Resend.ResendClient.Create(resendKey));
+            services.AddSingleton<IEmailSender, ResendEmailSender>();
+        }
+        else if (!string.IsNullOrWhiteSpace(brevoKey))
+            services.AddSingleton<IEmailSender, BrevoApiEmailSender>();
+        else if (!string.IsNullOrWhiteSpace(smtpHost))
             services.AddSingleton<IEmailSender, SmtpEmailSender>();
         else
             services.AddSingleton<IEmailSender, LoggingEmailSender>();

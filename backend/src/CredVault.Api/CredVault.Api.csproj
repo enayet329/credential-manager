@@ -22,6 +22,7 @@
     <PackageReference Include="BCrypt.Net-Next" />
     <PackageReference Include="ClosedXML" />
     <PackageReference Include="MailKit" />
+    <PackageReference Include="Resend" />
     <PackageReference Include="Serilog.AspNetCore" />
   </ItemGroup>
 
