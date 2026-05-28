@@ -148,6 +148,19 @@ export interface MemberDto {
   emailConfirmed: boolean;
 }
 
+export interface CredentialNoteDto {
+  id: string;
+  credentialId: string;
+  createdAtUtc: string;
+  createdByUserId: string;
+  content: string;
+}
+
+export interface CursorPage<T> {
+  items: T[];
+  nextCursor?: string | null;
+}
+
 export interface InviteMemberResponse {
   member: MemberDto;
   userCreated: boolean;

@@ -68,6 +68,7 @@ public static class MemberEndpoints
         IDateTimeProvider clock,
         IUnitOfWork uow,
         CredVault.Api.Auth.IEmailSender mailer,
+        Microsoft.Extensions.Options.IOptions<CredVault.Api.Auth.FrontendOptions> frontendOptions,
         HttpContext http,
         CancellationToken ct)
     {
@@ -123,6 +124,7 @@ public static class MemberEndpoints
         // is also returned in the response so the inviter can pass it on if email is down.
         try
         {
+            var loginUrl = frontendOptions.Value.LoginUrl;
             var subject = userCreated
                 ? $"You've been added to {orgSlug} on CredVault"
                 : $"You've been granted access to {orgSlug} on CredVault";
@@ -135,13 +137,15 @@ public static class MemberEndpoints
                       Password: {temporaryPassword}
                       Role:     {request.Role}
 
-                    Sign in here and change your password right away on the Account page.
+                    Sign in here: {loginUrl}
+
+                    Please change your password right after first sign-in via the Account page.
                     """
                 : $"""
                     You've been granted '{request.Role}' access to the '{orgSlug}' organisation on CredVault.
 
-                    Sign in with your existing CredVault account ({email.Value}) to see it in your
-                    organisation switcher.
+                    Sign in here with your existing CredVault account ({email.Value}): {loginUrl}
+                    The new organisation will appear in your organisation switcher.
                     """;
             await mailer.SendAsync(email.Value, subject, body, ct).ConfigureAwait(false);
         }

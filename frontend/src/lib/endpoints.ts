@@ -1,11 +1,14 @@
 // Thin typed wrappers over each backend endpoint.
 import { api } from "./api";
 import type {
+  CredentialAccessDto,
   CredentialFieldSchema,
   CredentialMetadataDto,
+  CredentialNoteDto,
   CredentialRotationDto,
   CredentialSchemaDto,
   CredentialValueResponse,
+  CursorPage,
   EnvironmentDto,
   EnvironmentType,
   InviteMemberResponse,
@@ -204,5 +207,44 @@ export const Credentials = {
         `/api/v1/orgs/${orgSlug}/credentials/${id}/share`,
         body,
       )
+      .then((r) => r.data),
+  accessLog: (
+    orgSlug: string,
+    id: string,
+    params: { actorType?: "User" | "ServiceToken"; limit?: number; cursor?: string } = {},
+  ) =>
+    api
+      .get<CursorPage<CredentialAccessDto>>(
+        `/api/v1/orgs/${orgSlug}/credentials/${id}/access-log`,
+        { params },
+      )
+      .then((r) => r.data),
+};
+
+export const Notes = {
+  list: (orgSlug: string, credentialId: string) =>
+    api
+      .get<CredentialNoteDto[]>(`/api/v1/orgs/${orgSlug}/credentials/${credentialId}/notes`)
+      .then((r) => r.data),
+  create: (orgSlug: string, credentialId: string, content: string) =>
+    api
+      .post<CredentialNoteDto>(
+        `/api/v1/orgs/${orgSlug}/credentials/${credentialId}/notes`,
+        { content },
+      )
+      .then((r) => r.data),
+  remove: (orgSlug: string, credentialId: string, noteId: string) =>
+    api.delete<void>(
+      `/api/v1/orgs/${orgSlug}/credentials/${credentialId}/notes/${noteId}`,
+    ),
+};
+
+export const AccessLog = {
+  org: (
+    orgSlug: string,
+    params: { credentialId?: string; actorId?: string; limit?: number; cursor?: string } = {},
+  ) =>
+    api
+      .get<CursorPage<CredentialAccessDto>>(`/api/v1/orgs/${orgSlug}/access-log`, { params })
       .then((r) => r.data),
 };

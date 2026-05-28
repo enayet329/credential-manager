@@ -5,9 +5,11 @@ import { useParams, useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { Card } from "@/components/Card";
 import { PageHeader } from "@/components/PageHeader";
+import { NotesPanel } from "@/components/NotesPanel";
 import { SchemaForm } from "@/components/SchemaForm";
 import { ShareDialog } from "@/components/ShareDialog";
 import { StepUpDialog } from "@/components/StepUpDialog";
+import { getStoredAuth } from "@/lib/auth";
 import { Credentials, Schemas } from "@/lib/endpoints";
 import { describeError, isStepUpRequired } from "@/lib/problem";
 import type {
@@ -292,6 +294,13 @@ export default function CredentialDetailPage() {
           </ul>
         )}
       </Card>
+
+      <div className="mt-6">
+        <NotesPanel
+          credentialId={id}
+          canRead={(getStoredAuth()?.permissions ?? []).includes("credentials:read:value")}
+        />
+      </div>
 
       {showRotate && schema && (
         <div className="fixed inset-0 z-40 grid place-items-center bg-slate-950/80 backdrop-blur">

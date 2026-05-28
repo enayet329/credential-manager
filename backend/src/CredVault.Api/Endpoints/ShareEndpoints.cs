@@ -39,6 +39,7 @@ public static class ShareEndpoints
         ShareTokenService tokens,
         IEmailSender email,
         ICurrentUser currentUser,
+        Microsoft.Extensions.Options.IOptions<FrontendOptions> frontendOptions,
         HttpContext http,
         CancellationToken ct)
     {
@@ -56,8 +57,8 @@ public static class ShareEndpoints
         var lifetime = TimeSpan.FromMinutes(request.ExpiresInMinutes);
         var (token, expires) = tokens.Issue(id, orgId.Value, currentUser.ActorId, request.AllowReveal, lifetime);
 
-        var baseUrl = $"{http.Request.Scheme}://{http.Request.Host}";
-        var shareUrl = $"{baseUrl}/shares/{Uri.EscapeDataString(token)}";
+        // Point the recipient at the web app, not the JSON API. The frontend page calls the API itself.
+        var shareUrl = frontendOptions.Value.ShareUrl(token);
 
         if (!string.IsNullOrWhiteSpace(request.RecipientEmail))
         {

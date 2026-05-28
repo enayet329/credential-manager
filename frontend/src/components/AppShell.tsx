@@ -12,6 +12,7 @@ const navLinks: { href: string; label: string; permission?: string }[] = [
   { href: "/projects", label: "Projects" },
   { href: "/suppliers", label: "Suppliers" },
   { href: "/members", label: "Members" },
+  { href: "/access-log", label: "Audit" },
   { href: "/admin/schemas", label: "Schemas", permission: "admin:schemas" },
 ];
 

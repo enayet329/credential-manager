@@ -47,6 +47,13 @@ builder.Host.UseSerilog((context, _, configuration) =>
 
 builder.Services.AddCredVaultInfrastructure(builder.Configuration);
 builder.Services.AddCredVaultApi(builder.Configuration);
+
+// Accept enum names ("Owner") as well as integers in inbound JSON, and emit names on outbound.
+// Without this the API rejects `{"role":"Developer"}` with a 400.
+builder.Services.ConfigureHttpJsonOptions(options =>
+{
+    options.SerializerOptions.Converters.Add(new System.Text.Json.Serialization.JsonStringEnumConverter());
+});
 builder.Services.AddOpenApi();
 builder.Services.AddProblemDetails();
 
