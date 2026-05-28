@@ -31,6 +31,9 @@ public static class DependencyInjection
         services.AddSingleton<AccessTokenService>();
         services.AddSingleton<ShareTokenService>();
 
+        services.AddOptions<FrontendOptions>()
+            .Bind(configuration.GetSection(FrontendOptions.SectionName));
+
         // Email transport. Preference order:
         //   1. Resend HTTP API     (Resend:ApiKey set)
         //   2. Brevo HTTP API      (Brevo:ApiKey set)

@@ -54,7 +54,7 @@ export default function LoginPage() {
         }}
       />
 
-      <div className="mx-auto flex min-h-screen max-w-md flex-col items-stretch justify-center px-6 py-12">
+      <div className="mx-auto flex min-h-screen max-w-md flex-col items-stretch justify-center px-4 py-10 sm:px-6 sm:py-12">
         <Link href="/" className="mb-8 flex items-center gap-2 text-lg font-semibold">
           <span className="grid h-9 w-9 place-items-center rounded-md bg-emerald-500/20 text-emerald-300">
             CV
@@ -62,7 +62,7 @@ export default function LoginPage() {
           CredVault
         </Link>
 
-        <div className="rounded-2xl border border-slate-800 bg-slate-900/60 p-8 shadow-2xl backdrop-blur">
+        <div className="rounded-2xl border border-slate-800 bg-slate-900/60 p-6 shadow-2xl backdrop-blur sm:p-8">
           <h1 className="text-2xl font-semibold">Welcome back</h1>
           <p className="mt-1 text-sm text-slate-400">
             Sign in to your vault to manage credentials.
@@ -103,6 +103,15 @@ export default function LoginPage() {
             >
               {submitting ? "Signing in…" : "Sign in"}
             </button>
+
+            <p className="text-center text-xs">
+              <Link
+                href="/forgot-password"
+                className="text-slate-400 underline-offset-4 hover:text-emerald-300 hover:underline"
+              >
+                Forgot your password?
+              </Link>
+            </p>
           </form>
 
           <div className="my-6 flex items-center gap-3 text-xs text-slate-600">

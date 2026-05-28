@@ -1,3 +1,5 @@
+using System.Security.Cryptography;
+using System.Text;
 using CredVault.Api.Auth;
 using CredVault.Api.Contracts;
 using CredVault.Api.Filters;
@@ -10,6 +12,7 @@ using CredVault.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 
 namespace CredVault.Api.Endpoints;
 
@@ -28,6 +31,18 @@ public static class AccountEndpoints
             .WithTags("Auth")
             .RequireAuthorization()
             .WithSummary("Change the authenticated user's password.");
+
+        routes.MapPost("/auth/forgot-password", ForgotPassword)
+            .WithTags("Auth")
+            .AllowAnonymous()
+            .WithMetadata(new SafetyNetAllowlistMarker())
+            .WithSummary("Send a password-reset email if the account exists.");
+
+        routes.MapPost("/auth/reset-password", ResetPassword)
+            .WithTags("Auth")
+            .AllowAnonymous()
+            .WithMetadata(new SafetyNetAllowlistMarker())
+            .WithSummary("Redeem a password-reset token and set a new password.");
 
         return routes;
     }
@@ -105,6 +120,116 @@ public static class AccountEndpoints
 
         await uow.SaveChangesAsync(ct).ConfigureAwait(false);
         return TypedResults.NoContent();
+    }
+
+    private static async Task<NoContent> ForgotPassword(
+        [FromBody] ForgotPasswordRequest request,
+        CredVaultDbContext db,
+        IDateTimeProvider clock,
+        IUnitOfWork uow,
+        IEmailSender mailer,
+        IOptions<FrontendOptions> frontendOptions,
+        CancellationToken ct)
+    {
+        ArgumentNullException.ThrowIfNull(request);
+
+        // Always return 204 — we never confirm whether an email is registered, because that would
+        // be an account-enumeration oracle. Errors are swallowed below for the same reason.
+
+        Email email;
+        try { email = Email.Create(request.Email); }
+        catch (DomainException) { return TypedResults.NoContent(); }
+
+        var user = await db.Users.FirstOrDefaultAsync(u => u.Email == email, ct).ConfigureAwait(false);
+        if (user is null) return TypedResults.NoContent();
+
+        var plaintextToken = GenerateResetToken();
+        var hash = HashToken(plaintextToken);
+        var row = PasswordResetToken.Create(user.Id, hash, clock);
+        db.PasswordResetTokens.Add(row);
+        await uow.SaveChangesAsync(ct).ConfigureAwait(false);
+
+        var resetUrl = frontendOptions.Value.PasswordResetUrl(plaintextToken);
+        var body =
+            $"""
+            Hi,
+
+            We received a request to reset the password for your CredVault account ({email.Value}).
+            Click the link below to choose a new password. The link is valid for 60 minutes and
+            can only be used once.
+
+              {resetUrl}
+
+            If you didn't request a password reset, you can safely ignore this email — your
+            password won't change unless you click the link above.
+            """;
+
+        try
+        {
+            await mailer.SendAsync(email.Value, "Reset your CredVault password", body, ct).ConfigureAwait(false);
+        }
+        catch
+        {
+            // Email-transport failures must not leak into the response — the token is still
+            // valid and the user can try the "Send again" affordance.
+        }
+
+        return TypedResults.NoContent();
+    }
+
+    private static async Task<Results<NoContent, ProblemHttpResult>> ResetPassword(
+        [FromBody] ResetPasswordRequest request,
+        CredVaultDbContext db,
+        IDateTimeProvider clock,
+        IUnitOfWork uow,
+        CancellationToken ct)
+    {
+        ArgumentNullException.ThrowIfNull(request);
+
+        var hash = HashToken(request.Token);
+
+        var row = await db.PasswordResetTokens
+            .FirstOrDefaultAsync(t => t.TokenHash == hash, ct)
+            .ConfigureAwait(false);
+
+        if (row is null || !row.IsRedeemable(clock))
+            return ProblemDetailsHelpers.BadRequest("This reset link is invalid or has expired.");
+
+        var user = await db.Users.FirstOrDefaultAsync(u => u.Id == row.UserId, ct).ConfigureAwait(false);
+        if (user is null)
+            return ProblemDetailsHelpers.BadRequest("This reset link is invalid or has expired.");
+
+        var newHash = BCrypt.Net.BCrypt.HashPassword(request.NewPassword, workFactor: 12);
+        db.Entry(user).Property(nameof(User.PasswordHash)).CurrentValue = newHash;
+
+        row.MarkUsed(clock);
+
+        // Invalidate any other outstanding reset tokens for this user.
+        var others = await db.PasswordResetTokens
+            .Where(t => t.UserId == row.UserId && t.UsedAtUtc == null && t.Id != row.Id)
+            .ToListAsync(ct).ConfigureAwait(false);
+        foreach (var t in others)
+            t.MarkUsed(clock);
+
+        await uow.SaveChangesAsync(ct).ConfigureAwait(false);
+        return TypedResults.NoContent();
+    }
+
+    private static string GenerateResetToken()
+    {
+        Span<byte> bytes = stackalloc byte[32];
+        RandomNumberGenerator.Fill(bytes);
+        // URL-safe base64 without padding.
+        return Convert.ToBase64String(bytes)
+            .Replace('+', '-')
+            .Replace('/', '_')
+            .TrimEnd('=');
+    }
+
+    private static string HashToken(string token)
+    {
+        var bytes = SHA256.HashData(Encoding.UTF8.GetBytes(token));
+        return Convert.ToHexString(bytes).ToLowerInvariant();
     }
 
     private static string SlugifyEmail(string email)

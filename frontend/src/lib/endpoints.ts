@@ -28,6 +28,10 @@ export const Auth = {
     api.post<LoginResponse>("/auth/register", body).then((r) => r.data),
   changePassword: (body: { currentPassword: string; newPassword: string }) =>
     api.post<void>("/auth/password", body),
+  forgotPassword: (email: string) =>
+    api.post<void>("/auth/forgot-password", { email }),
+  resetPassword: (body: { token: string; newPassword: string }) =>
+    api.post<void>("/auth/reset-password", body),
   stepUp: (mfaCode: string) =>
     api.post<StepUpResponse>("/auth/step-up", { mfaCode }).then((r) => r.data),
 };

@@ -13,7 +13,7 @@ export default function LandingPage() {
       />
 
       <header className="border-b border-slate-800/60 backdrop-blur">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
+        <div className="mx-auto flex max-w-6xl items-center justify-between gap-2 px-4 py-3 sm:px-6 sm:py-4">
           <Link href="/" className="flex items-center gap-2 text-lg font-semibold">
             <span className="grid h-8 w-8 place-items-center rounded-md bg-emerald-500/20 text-emerald-300">
               CV
@@ -37,7 +37,7 @@ export default function LandingPage() {
         </div>
       </header>
 
-      <section className="mx-auto max-w-6xl px-6 py-20 lg:py-28">
+      <section className="mx-auto max-w-6xl px-4 py-14 sm:px-6 sm:py-20 lg:py-28">
         <div className="grid items-center gap-16 lg:grid-cols-2">
           <div>
             <p className="inline-flex items-center gap-2 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 text-xs font-medium text-emerald-300">
@@ -80,7 +80,7 @@ export default function LandingPage() {
       </section>
 
       <section className="border-t border-slate-800/60 bg-slate-950/60">
-        <div className="mx-auto max-w-6xl px-6 py-16">
+        <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6 sm:py-16">
           <h2 className="text-2xl font-semibold">How it works</h2>
           <div className="mt-8 grid gap-6 sm:grid-cols-3">
             <Step
@@ -103,7 +103,7 @@ export default function LandingPage() {
       </section>
 
       <footer className="border-t border-slate-800/60 bg-slate-950">
-        <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-3 px-6 py-6 text-sm text-slate-500 sm:flex-row">
+        <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-3 px-4 py-6 text-sm text-slate-500 sm:flex-row sm:px-6">
           <span>© CredVault</span>
           <span>Built on .NET 10 + Next.js</span>
         </div>
